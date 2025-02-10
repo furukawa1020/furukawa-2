@@ -1,0 +1,27 @@
+{
+  "name": "empathetic-warmth-project",
+  "version": "1.0.0",
+  "description": "A project to document activities and creations themed around empathetic warmth and values beyond efficiency.",
+  "main": "src/App.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "4.0.3"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "empathetic",
+    "warmth",
+    "project",
+    "media",
+    "upload"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
