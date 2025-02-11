@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import Link from 'next/link';
 import '../styles/globals.css';
 
 function MyApp({ Component, pageProps }) {
@@ -81,7 +82,29 @@ function MyApp({ Component, pageProps }) {
         />
       </Head>
 
-      <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-white to-gray-100" role="application">
+      <div className="min-h-screen w-full bg-gradient-to-br from-white via-gray-50 to-gray-100" role="application">
+        <nav className="fixed top-4 right-4 z-20">
+          <div className="flex gap-4">
+            <button 
+              onClick={() => router.push('/projects')}
+              className="px-4 py-2 text-gray-700 hover:text-gray-900 bg-white/80 hover:bg-white rounded-lg shadow-sm transition-all duration-300"
+            >
+              Projects
+            </button>
+            <button 
+              onClick={() => router.push('/about')}
+              className="px-4 py-2 text-gray-700 hover:text-gray-900 bg-white/80 hover:bg-white rounded-lg shadow-sm transition-all duration-300"
+            >
+              About
+            </button>
+            <button 
+              onClick={() => router.push('/contact')}
+              className="px-4 py-2 text-gray-700 hover:text-gray-900 bg-white/80 hover:bg-white rounded-lg shadow-sm transition-all duration-300"
+            >
+              Contact
+            </button>
+          </div>
+        </nav>
         {error && (
           <div role="alert" className="fixed top-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-lg">
             {error}
@@ -92,11 +115,11 @@ function MyApp({ Component, pageProps }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-10 backdrop-blur-sm"
           >
             <div className="flex flex-col items-center">
-              <div className="w-12 h-12 border-t-2 border-blue-500 rounded-full animate-spin" />
-              <p className="mt-4 text-white font-space-grotesk">Loading...</p>
+              <div className="w-12 h-12 border-t-2 border-blue-400 rounded-full animate-spin" />
+              <p className="mt-4 text-gray-800 font-space-grotesk">Loading...</p>
             </div>
           </motion.div>
         )}
@@ -115,14 +138,14 @@ function MyApp({ Component, pageProps }) {
         </AnimatePresence>
 
         <div 
-          className="fixed bottom-0 right-0 text-[20vw] font-bold text-gray-900/5 pointer-events-none select-none"
+          className="fixed bottom-0 right-0 text-[20vw] font-bold text-gray-200 pointer-events-none select-none"
           style={{ fontFamily: 'Space Grotesk' }}
         >
           UX
         </div>
 
         <motion.div
-          className="fixed top-0 left-0 right-0 h-1 bg-blue-500 origin-left z-50"
+          className="fixed top-0 left-0 right-0 h-1 bg-blue-400 origin-left z-50"
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ duration: 0.5 }}
