@@ -17,7 +17,7 @@
 
   /* ボディ基本設定 */
   body {
-    @apply bg-gray-50 text-gray-900;  /* 明るい背景色とダークテキスト */
+    @apply bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 min-h-screen text-gray-900;
     font-family: var(--font-outfit);
   }
 
@@ -45,12 +45,12 @@
 
   /* ナビゲーションリンク */
   .nav-link {
-    @apply text-gray-600 hover:text-gray-900 transition-colors duration-300;
+    @apply text-gray-700 hover:text-gray-900 transition-colors duration-300;
   }
 
   /* コンテンツカード */
   .content-card {
-    @apply bg-white shadow-lg rounded-lg p-6;
+    @apply bg-white/90 shadow-lg rounded-lg p-6;
     @apply hover:shadow-xl transition-all duration-300;
   }
 }
@@ -120,8 +120,8 @@
   }
 }
 
-/* ダークモード対応 */
-@media (prefers-color-scheme: dark) {
+/* ダークモード対応を一時的にコメントアウト */
+/* @media (prefers-color-scheme: dark) {
   body {
     @apply bg-gray-900 text-white;
   }
@@ -138,7 +138,7 @@
   .dark-mode-adjust {
     @apply text-gray-300;
   }
-}
+} */
 
 /* プリント用スタイル */
 @media print {
