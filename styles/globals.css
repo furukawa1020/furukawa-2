@@ -17,7 +17,7 @@
 
   /* ボディ基本設定 */
   body {
-    @apply bg-gray-900 text-white;
+    @apply bg-gray-50 text-gray-900;  /* 明るい背景色とダークテキスト */
     font-family: var(--font-outfit);
   }
 
@@ -45,13 +45,13 @@
 
   /* ナビゲーションリンク */
   .nav-link {
-    @apply text-gray-400 hover:text-white transition-colors duration-300;
+    @apply text-gray-600 hover:text-gray-900 transition-colors duration-300;
   }
 
   /* コンテンツカード */
   .content-card {
-    @apply bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-6;
-    @apply hover:bg-opacity-20 transition-all duration-300;
+    @apply bg-white shadow-lg rounded-lg p-6;
+    @apply hover:shadow-xl transition-all duration-300;
   }
 }
 
@@ -122,6 +122,19 @@
 
 /* ダークモード対応 */
 @media (prefers-color-scheme: dark) {
+  body {
+    @apply bg-gray-900 text-white;
+  }
+
+  .nav-link {
+    @apply text-gray-400 hover:text-white;
+  }
+
+  .content-card {
+    @apply bg-white bg-opacity-10 backdrop-blur-sm;
+    @apply hover:bg-opacity-20;
+  }
+
   .dark-mode-adjust {
     @apply text-gray-300;
   }
