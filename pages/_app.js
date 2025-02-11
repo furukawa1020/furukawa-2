@@ -2,29 +2,44 @@ import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import '../styles/globals.css';  // global.css から globals.css に変更
+import '../styles/globals.css';
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [isRouteChanging, setIsRouteChanging] = useState(false);
+  const [loadingKey, setLoadingKey] = useState(0);
+  const [error, setError] = useState(null);
 
-  // ページ遷移時のローディング状態管理
   useEffect(() => {
-    const handleStart = () => setLoading(true);
-    const handleComplete = () => setLoading(false);
+    const handleStart = () => {
+      setIsRouteChanging(true);
+      setLoading(true);
+      setLoadingKey(prev => prev + 1);
+    };
+
+    const handleComplete = () => {
+      setIsRouteChanging(false);
+      setLoading(false);
+    };
+
+    const handleError = (err) => {
+      setError(err.message);
+      setLoading(false);
+      setIsRouteChanging(false);
+    };
 
     router.events.on('routeChangeStart', handleStart);
     router.events.on('routeChangeComplete', handleComplete);
-    router.events.on('routeChangeError', handleComplete);
+    router.events.on('routeChangeError', handleError);
 
     return () => {
       router.events.off('routeChangeStart', handleStart);
       router.events.off('routeChangeComplete', handleComplete);
-      router.events.off('routeChangeError', handleComplete);
+      router.events.off('routeChangeError', handleError);
     };
   }, [router]);
 
-  // ページトランジションの設定
   const pageVariants = {
     initial: {
       opacity: 0,
@@ -50,19 +65,34 @@ function MyApp({ Component, pageProps }) {
   return (
     <>
       <Head>
+        <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+        <meta name="description" content="Empathetic Warmth Project - Creating Beyond Efficiency" />
+        <title>Empathetic Warmth Project</title>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet"
+          crossOrigin="anonymous"
+        />
+        <link 
+          href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" 
+          rel="stylesheet"
+          crossOrigin="anonymous"
+        />
       </Head>
 
-      <div className="min-h-screen w-full bg-white"> {/* bg-white を追加 */}
-        {/* ローディングインジケーター */}
+      <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-white to-gray-100" role="application">
+        {error && (
+          <div role="alert" className="fixed top-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-lg">
+            {error}
+          </div>
+        )}
         {loading && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm"
           >
             <div className="flex flex-col items-center">
               <div className="w-12 h-12 border-t-2 border-blue-500 rounded-full animate-spin" />
@@ -71,7 +101,6 @@ function MyApp({ Component, pageProps }) {
           </motion.div>
         )}
 
-        {/* メインコンテンツ */}
         <AnimatePresence mode="wait">
           <motion.main
             key={router.route}
@@ -79,13 +108,19 @@ function MyApp({ Component, pageProps }) {
             animate="enter"
             exit="exit"
             variants={pageVariants}
-            className="min-h-screen w-full"
+            className="min-h-screen w-full relative z-10"
           >
             <Component {...pageProps} />
           </motion.main>
         </AnimatePresence>
 
-        {/* グローバルスクロールプログレス */}
+        <div 
+          className="fixed bottom-0 right-0 text-[20vw] font-bold text-gray-900/5 pointer-events-none select-none"
+          style={{ fontFamily: 'Space Grotesk' }}
+        >
+          UX
+        </div>
+
         <motion.div
           className="fixed top-0 left-0 right-0 h-1 bg-blue-500 origin-left z-50"
           initial={{ scaleX: 0 }}
