@@ -17,7 +17,7 @@
 
   /* ボディ基本設定 */
   body {
-    @apply bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 min-h-screen text-gray-900;
+    @apply bg-white text-gray-900;  /* 背景を白に変更 */
     font-family: var(--font-outfit);
   }
 

@@ -55,7 +55,7 @@ function MyApp({ Component, pageProps }) {
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       </Head>
 
-      <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      <div className="min-h-screen w-full">
         {/* ローディングインジケーター */}
         {loading && (
           <motion.div
