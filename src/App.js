@@ -1,4 +1,5 @@
 import React from 'react';
+<<<<<<< HEAD
 import Link from 'next/link';
 import './styles/global.css';
 
@@ -33,3 +34,22 @@ export default function App({ Component, pageProps }) {
     </div>
   );
 }
+=======
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import Projects from './pages/Projects';
+import './styles/global.css';
+
+function App() {
+  return (
+    <Router>
+      <div className="App">
+        <Switch>
+          <Route path="/" exact component={Projects} />
+        </Switch>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
+>>>>>>> origin/main
