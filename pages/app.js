@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import './styles/global.css';
+import "../styles/global.css"; // グローバル CSS の正しいパスに変更
 
 export default function App({ Component, pageProps }) {
   // ページロード時のフェードインアニメーション（任意）
