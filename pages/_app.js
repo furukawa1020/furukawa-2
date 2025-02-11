@@ -13,33 +13,45 @@ function AboutContent() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h1 className="text-5xl font-bold text-gray-800 mb-8">About</h1>
+        <h1 className="text-5xl font-bold text-gray-800 mb-8">My Vision</h1>
         
         <div className="prose prose-lg">
-          <p className="text-xl text-gray-600 mb-6 leading-relaxed">
-            Empathetic Warmth Projectは、効率性を超えた価値を創造することを目指しています。
-            人々の感情や経験を大切にしながら、テクノロジーの可能性を追求します。
+          <p className="text-2xl text-gray-800 mb-8 leading-relaxed font-medium">
+            技術と社会の再設計で、生きててよかったと思える未来を。
           </p>
 
-          <h2 className="text-3xl font-bold text-gray-800 mt-12 mb-6">Our Vision</h2>
+          <p className="text-xl text-gray-600 mb-10 leading-relaxed">
+            人々が本当に感じる瞬間を大切にし、効率だけではなく、心が満たされる社会を築く。
+          </p>
+
+          <h2 className="text-3xl font-bold text-gray-800 mt-16 mb-6">My Approach</h2>
           <p className="text-lg text-gray-600 mb-8">
-            テクノロジーを通じて、より温かみのある、共感に満ちた世界を作ることを目指しています。
-            効率だけでなく、使う人の気持ちに寄り添うソリューションを提供します。
+            ユーザーフレンドリーなシステムとコミュニティ、心に響くものづくりを通じて、
+            直感的で温かみのある体験を提供する。
           </p>
 
-          <h2 className="text-3xl font-bold text-gray-800 mt-12 mb-6">Our Approach</h2>
-          <ul className="space-y-4 text-gray-600">
+          <h2 className="text-3xl font-bold text-gray-800 mt-16 mb-6">3つの柱</h2>
+          <ul className="space-y-6 text-gray-600">
             <li className="flex items-start">
-              <span className="text-blue-500 mr-2">→</span>
-              <span>人間中心のデザイン思考</span>
+              <span className="text-blue-500 mr-4 text-xl">→</span>
+              <div>
+                <span className="font-semibold text-gray-800">ユーザーフレンドリーなデザイン</span>
+                <p className="mt-2">直感的で親しみやすいシステムを構築し、誰もが使いやすい体験を提供。</p>
+              </div>
             </li>
             <li className="flex items-start">
-              <span className="text-blue-500 mr-2">→</span>
-              <span>持続可能な技術革新</span>
+              <span className="text-blue-500 mr-4 text-xl">→</span>
+              <div>
+                <span className="font-semibold text-gray-800">共感とつながり</span>
+                <p className="mt-2">人々が本当に感じられるコミュニティを創る。</p>
+              </div>
             </li>
             <li className="flex items-start">
-              <span className="text-blue-500 mr-2">→</span>
-              <span>共感を基盤とした開発プロセス</span>
+              <span className="text-blue-500 mr-4 text-xl">→</span>
+              <div>
+                <span className="font-semibold text-gray-800">心に響くものづくり</span>
+                <p className="mt-2">効率偏重ではなく、感情や生活に寄り添った創造的なものづくり。</p>
+              </div>
             </li>
           </ul>
         </div>
@@ -183,13 +195,26 @@ function ContactContent() {
 function ProjectsContent() {
   const projects = [
     {
-      title: "empathetic-warmth-project",
-      description: "人々の感情や経験を大切にする、共感に基づいたWebアプリケーション",
-      image: "/path-to-image.jpg", // 実際のプロジェクト画像パスに更新
-      tags: ["Next.js", "TailwindCSS", "Framer Motion"],
-      link: "https://github.com/yourusername/empathetic-warmth-project"
+      title: "スタック雪だるまチャン",
+      description: "効率の外にある価値としての「カワイイ」を追求した、温かみのあるインタラクティブな雪だるまキャラクター。触れることで変化し、ユーザーとの対話を楽しむ体験を提供します。",
+      image: "/images/snowman.jpg", // 雪だるまの画像パスを追加
+      tags: ["スタックチャン", "インタラクションデザイン", "アニメーション", "AI"],
+      link: "#" // プロジェクトのリンクを追加
     },
-    // 他の実際のプロジェクトを追加
+    {
+      title: "フグ式膨張オブジェ",
+      description: "これから開発を進めていく、ストレスリリーフを目的とした膨張・収縮するオブジェクト。ユーザーの感情状態を反映し、視覚的な癒しを提供することを目指しています。",
+      image: "/images/puffer.jpg", // 膨張オブジェの画像パスを追加
+      tags: ["3Dモデリング", "TPU", "EDAセンサー", "BLE通信", "マイクロポンプ"],
+      link: "#"
+    },
+    {
+      title: "真にユーザーフレンドリーなシステム",
+      description: "これから進めていく、真にユーザーフレンドリーなシステムとコミュニティを追求する研究。効率だけでなく、人々が心地よく感じられる体験を提供することを目指しています。",
+      image: "/images/community.jpg", // コミュニティシステムの画像パスを追加
+      tags: ["ユーザーフレンドリー", "システムデザイン", "コミュニティ", "インタラクション"],
+      link: "#"
+    }
   ];
 
   return (
@@ -203,17 +228,38 @@ function ProjectsContent() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {projects.map((project, index) => (
-            <motion.a
+            <motion.div
               key={index}
-              href={project.link}
-              target="_blank"
-              rel="noopener noreferrer"
               className="bg-white rounded-lg shadow-lg overflow-hidden"
-              whileHover={{ y: -5 }}
+              whileHover={{ y: -5, scale: 1.02 }}
               transition={{ duration: 0.2 }}
             >
-              {/* プロジェクトカードの内容 */}
-            </motion.a>
+              <div className="relative h-48 bg-gray-200 overflow-hidden">
+                <motion.img
+                  src={project.image}
+                  alt={project.title}
+                  className="w-full h-full object-cover"
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-bold text-gray-800 mb-2">{project.title}</h3>
+                <p className="text-gray-600 text-sm mb-4">
+                  {project.description}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {project.tags.map((tag, tagIndex) => (
+                    <span
+                      key={tagIndex}
+                      className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
           ))}
         </div>
       </motion.div>
