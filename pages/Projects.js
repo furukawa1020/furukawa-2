@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import Upload from "../components/Upload";
+import Upload from "../src/components/Upload";
 
 export default function Projects() {
   const [media, setMedia] = useState([]);
