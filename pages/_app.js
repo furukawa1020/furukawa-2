@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import '../styles/globals.css';
+import '../styles/globals.css';  // global.css から globals.css に変更
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
