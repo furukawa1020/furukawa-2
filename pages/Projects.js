@@ -1,44 +1,76 @@
 "use client";
-import { useState } from "react";
+import React, { useState } from 'react';
 import Upload from "../src/components/Upload";
 
 export default function Projects() {
   const [media, setMedia] = useState([]);
 
   const handleUpload = (files) => {
-    const newMedia = Array.from(files).map((file) =>
-      URL.createObjectURL(file)
-    );
+    const newMedia = Array.from(files).map((file) => ({
+      url: URL.createObjectURL(file),
+      type: file.type,
+      title: '',
+      description: ''
+    }));
     setMedia([...media, ...newMedia]);
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center text-gray-800">
-      {/* 背景画像 */}
-      <div 
-        className="absolute inset-0 bg-image"
-        style={{ backgroundImage: "url('/images/projects-bg.jpg')" }}
-      ></div>
+    <div className="min-h-screen p-8 bg-[#f4d03f]"> {/* コルクボードのような暖かい色 */}
+      {/* コルクボードテクスチャのオーバーレイ */}
+      <div className="absolute inset-0 bg-repeat opacity-30"
+        style={{
+          backgroundImage: `url('/images/cork-texture.png')`,
+          pointerEvents: 'none'
+        }}
+      />
 
-      {/* タイトル */}
-      <h1 className="relative z-10 text-7xl font-bold mt-20 bg-white bg-opacity-70 p-5 rounded-lg shadow-lg">
-        My Projects
+      <h1 className="relative text-4xl font-bold mb-8 text-gray-800 text-center">
+        <span className="bg-white px-6 py-2 rounded shadow-md transform -rotate-2 inline-block">
+          My Projects
+        </span>
       </h1>
 
-      {/* アップロード UI */}
-      <Upload onUpload={handleUpload} />
-
-      {/* プレビュー */}
-      <div className="relative z-10 grid grid-cols-2 md:grid-cols-3 gap-6 mt-10">
-        {media.map((src, index) => (
-          <div key={index} className="p-2 bg-white bg-opacity-70 rounded-lg shadow-lg">
-            {src.includes("video") ? (
-              <video src={src} controls className="w-48 h-48 object-cover rounded-lg" />
+      <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {media.map((item, index) => (
+          <div key={index} 
+            className="bg-white p-4 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-200"
+            style={{
+              transform: `rotate(${Math.random() * 6 - 3}deg)` // ランダムな角度で傾ける
+            }}
+          >
+            {item.type.includes('video') ? (
+              <video src={item.url} controls className="w-full h-48 object-cover rounded-lg mb-4" />
             ) : (
-              <img src={src} className="w-48 h-48 object-cover rounded-lg" />
+              <img src={item.url} alt="" className="w-full h-48 object-cover rounded-lg mb-4" />
             )}
+            <input
+              type="text"
+              placeholder="プロジェクト名"
+              className="w-full mb-2 p-2 border rounded"
+              onChange={(e) => {
+                const newMedia = [...media];
+                newMedia[index].title = e.target.value;
+                setMedia(newMedia);
+              }}
+            />
+            <textarea
+              placeholder="プロジェクトの説明"
+              className="w-full p-2 border rounded"
+              rows="3"
+              onChange={(e) => {
+                const newMedia = [...media];
+                newMedia[index].description = e.target.value;
+                setMedia(newMedia);
+              }}
+            />
           </div>
         ))}
+      </div>
+
+      {/* アップロードボタン */}
+      <div className="fixed bottom-8 right-8">
+        <Upload onUpload={handleUpload} />
       </div>
     </div>
   );
