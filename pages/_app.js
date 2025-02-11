@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import '../styles/global.css';
+import '../styles/global.css';  // グローバルCSSのインポート位置が重要
 
 export default function App({ Component, pageProps }) {
   const [loaded, setLoaded] = useState(false);

@@ -1,4 +1,4 @@
-"use client";
+import React from 'react';
 
 export default function About() {
   return (
@@ -6,19 +6,42 @@ export default function About() {
       {/* 背景画像 */}
       <div 
         className="absolute inset-0 bg-image"
-        style={{ backgroundImage: "url('/images/projects-bg.jpg')" }}
+        style={{ 
+          backgroundImage: "url('/images/projects-bg.jpg')",  // この画像が public/images/ に存在するか確認
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          opacity: '0.7'
+        }}
       ></div>
 
-      {/* タイトル */}
-      <h1 className="relative z-10 text-7xl font-bold mt-20 bg-white bg-opacity-70 p-5 rounded-lg shadow-lg">
-        About Me
-      </h1>
+      {/* コンテンツ */}
+      <div className="relative z-10 w-full max-w-4xl px-4 py-20">
+        <h1 className="text-6xl font-bold mb-8 text-center bg-white bg-opacity-80 p-6 rounded-lg shadow-lg">
+          About Me
+        </h1>
 
-      {/* 自己紹介 */}
-      <div className="relative z-10 mt-10 p-5 bg-white bg-opacity-70 rounded-lg shadow-lg">
-        <p>こんにちは！私は[あなたの名前]です。私は[あなたの職業や趣味]をしています。</p>
-        <p>このウェブサイトでは、私の活動や作ったものの写真や動画、コードなどを記録しています。</p>
-        <p>「共感的ぬくもり」や「効率の外の価値」を大切にし、ユーザーにとって心地よい体験を提供することを目指しています。</p>
+        <div className="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg space-y-6">
+          <section className="space-y-4">
+            <h2 className="text-3xl font-semibold text-gray-700">自己紹介</h2>
+            <p className="text-lg leading-relaxed">
+              温かみのある創造的な体験を大切にしています。効率だけでなく、人々の心に響く瞬間を作りたいと考えています。
+            </p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-3xl font-semibold text-gray-700">スキル・経験</h2>
+            <p className="text-lg leading-relaxed">
+              ウェブ開発、デザイン、プロジェクトマネジメントなどの経験を活かし、技術と創造性の調和を目指しています。
+            </p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-3xl font-semibold text-gray-700">価値観</h2>
+            <p className="text-lg leading-relaxed">
+              「共感的ぬくもり」をテーマに、効率性だけでなく、人々の心に寄り添うプロジェクトを展開しています。
+            </p>
+          </section>
+        </div>
       </div>
     </div>
   );
