@@ -16,11 +16,9 @@ export default function Contact() {
 
       {/* 連絡先情報 */}
       <div className="relative z-10 mt-10 p-5 bg-white bg-opacity-70 rounded-lg shadow-lg">
-        <p>Instagram: <a href="https://www.instagram.com/yourusername" className="text-blue-500">yourusername</a></p>
-        <p>X (Twitter): <a href="https://twitter.com/yourusername" className="text-blue-500">yourusername</a></p>
-        <p>Email: <a href="mailto:your.email@example.com" className="text-blue-500">your.email@example.com</a></p>
-        <p>Facebook: <a href="https://www.facebook.com/yourusername" className="text-blue-500">yourusername</a></p>
-        <p>GitHub: <a href="https://github.com/yourusername" className="text-blue-500">yourusername</a></p>
+        <p>GitHub: <a href="https://github.com/furukawa1020" target="_blank" className="text-blue-500 hover:underline">GitHub</a></p>
+        <p>Twitter (X): <a href="https://x.com/HATAKE55555" target="_blank" className="text-blue-500 hover:underline">Twitter (X)</a></p>
+        <p>Email: <a href="mailto:f.kotaro.0530@gmail.com" className="text-blue-500 hover:underline">f.kotaro.0530@gmail.com</a></p>
       </div>
     </div>
   );
