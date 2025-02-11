@@ -55,7 +55,7 @@ function MyApp({ Component, pageProps }) {
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       </Head>
 
-      <div className="min-h-screen w-full">
+      <div className="min-h-screen w-full bg-white"> {/* bg-white を追加 */}
         {/* ローディングインジケーター */}
         {loading && (
           <motion.div
