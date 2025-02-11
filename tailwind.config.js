@@ -1,4 +1,3 @@
-etic-warmth-project/tailwind.config.js
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -49,13 +48,14 @@ module.exports = {
       fontSize: {
         'dynamic-base': 'calc(14px + 0.390625vw)',
       },
+      backdropBlur: {
+        'xs': '2px',
+      },
     },
   },
   plugins: [
     // スクロールバーのカスタマイズプラグイン
     require('tailwind-scrollbar')({ nocompatible: true }),
-    // バックドロップブラーのサポート
-    require('@tailwindcss/backdrop-blur'),
   ],
   variants: {
     extend: {
@@ -65,6 +65,7 @@ module.exports = {
       opacity: ['hover', 'focus'],
       scale: ['hover', 'group-hover'],
       transform: ['hover', 'focus'],
+      backdropBlur: ['hover'],
     },
   },
 };
