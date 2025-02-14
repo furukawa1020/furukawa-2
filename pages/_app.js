@@ -286,43 +286,50 @@ function ProjectModal({ project, onClose, isDarkMode }) {
   const [logs, setLogs] = useState([]);
   const [media, setMedia] = useState([]);
 
-  // ログとメディアをローカルストレージに保存
+  // ローカルストレージからデータを読み込む
   useEffect(() => {
-    const savedLogs = localStorage.getItem(`logs-${project.title}`);
-    const savedMedia = localStorage.getItem(`media-${project.title}`);
-    if (savedLogs) setLogs(JSON.parse(savedLogs));
-    if (savedMedia) setMedia(JSON.parse(savedMedia));
+    const loadSavedData = () => {
+      const savedLogs = localStorage.getItem(`project-logs-${project.title}`);
+      const savedMedia = localStorage.getItem(`project-media-${project.title}`);
+      if (savedLogs) setLogs(JSON.parse(savedLogs));
+      if (savedMedia) setMedia(JSON.parse(savedMedia));
+    };
+    loadSavedData();
   }, [project.title]);
 
+  // データの変更をローカルストレージに保存
   useEffect(() => {
-    localStorage.setItem(`logs-${project.title}`, JSON.stringify(logs));
+    localStorage.setItem(`project-logs-${project.title}`, JSON.stringify(logs));
   }, [logs, project.title]);
 
   useEffect(() => {
-    localStorage.setItem(`media-${project.title}`, JSON.stringify(media));
+    localStorage.setItem(`project-media-${project.title}`, JSON.stringify(media));
   }, [media, project.title]);
 
-  const addLog = (e) => {
+  // ログの追加
+  const handleAddLog = (e) => {
     e.preventDefault();
     if (!newLog.trim()) return;
-    
+
     const newLogEntry = {
       id: Date.now(),
       text: newLog,
-      date: new Date().toLocaleString()
+      date: new Date().toLocaleString('ja-JP'),
     };
-    
+
     setLogs([newLogEntry, ...logs]);
     setNewLog('');
   };
 
+  // メディアのアップロード
   const handleMediaUpload = (e) => {
     const files = Array.from(e.target.files);
     const newMedia = files.map(file => ({
-      id: Date.now(),
+      id: Date.now() + Math.random(),
       type: file.type.startsWith('image/') ? 'image' : 'video',
       url: URL.createObjectURL(file),
-      name: file.name
+      name: file.name,
+      date: new Date().toLocaleString('ja-JP')
     }));
     setMedia([...newMedia, ...media]);
   };
@@ -332,30 +339,58 @@ function ProjectModal({ project, onClose, isDarkMode }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${
-        isDarkMode ? 'bg-gray-900/95' : 'bg-gray-50/95'
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm ${
+        isDarkMode ? 'bg-gray-900/90' : 'bg-gray-50/90'
       }`}
     >
-      <div className={`max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl ${
-        isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
-      }`}>
-        <div className="sticky top-0 z-10 p-4 border-b flex justify-between items-center">
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className={`max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl ${
+          isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
+        }`}
+      >
+        {/* ヘッダー */}
+        <div className={`sticky top-0 z-10 p-4 border-b flex justify-between items-center ${
+          isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'
+        }`}>
           <h2 className="text-2xl font-bold">{project.title}</h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+            className={`p-2 rounded-full transition-colors ${
+              isDarkMode 
+                ? 'hover:bg-gray-700 text-gray-400 hover:text-white'
+                : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+            }`}
           >
             ✕
           </button>
         </div>
 
+        {/* コンテンツ */}
         <div className="p-6 space-y-8">
           {/* プロジェクト詳細 */}
           <div>
+            <div className="aspect-video w-full rounded-lg overflow-hidden mb-6">
+              <img 
+                src={project.image} 
+                alt={project.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
             <p className="text-lg mb-4">{project.description}</p>
             <div className="flex flex-wrap gap-2">
               {project.tags.map((tag, index) => (
-                <span key={index} className="px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                <span 
+                  key={index} 
+                  className={`px-3 py-1 rounded-full text-sm ${
+                    isDarkMode 
+                      ? 'bg-blue-900/50 text-blue-200'
+                      : 'bg-blue-100 text-blue-800'
+                  }`}
+                >
                   {tag}
                 </span>
               ))}
@@ -375,20 +410,34 @@ function ProjectModal({ project, onClose, isDarkMode }) {
             />
             <label
               htmlFor="media-upload"
-              className="inline-block px-4 py-2 rounded-lg bg-blue-500 text-white cursor-pointer hover:bg-blue-600"
+              className={`inline-block px-4 py-2 rounded-lg cursor-pointer transition-colors ${
+                isDarkMode
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                  : 'bg-blue-500 hover:bg-blue-600 text-white'
+              }`}
             >
               Add Media
             </label>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
               {media.map((item) => (
-                <div key={item.id} className="relative rounded-lg overflow-hidden">
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className={`relative rounded-lg overflow-hidden group ${
+                    isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
+                  }`}
+                >
                   {item.type === 'image' ? (
                     <img src={item.url} alt="" className="w-full h-48 object-cover" />
                   ) : (
                     <video src={item.url} className="w-full h-48 object-cover" controls />
                   )}
-                </div>
+                  <div className="absolute bottom-0 left-0 right-0 p-2 text-xs bg-black/50 text-white">
+                    {item.date}
+                  </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -396,19 +445,25 @@ function ProjectModal({ project, onClose, isDarkMode }) {
           {/* ログ追加フォーム */}
           <div>
             <h3 className="text-xl font-bold mb-4">Progress Logs</h3>
-            <form onSubmit={addLog} className="mb-4">
+            <form onSubmit={handleAddLog} className="mb-4">
               <textarea
                 value={newLog}
                 onChange={(e) => setNewLog(e.target.value)}
-                className={`w-full p-3 rounded-lg border ${
-                  isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'
+                className={`w-full p-3 rounded-lg border transition-colors ${
+                  isDarkMode 
+                    ? 'bg-gray-700 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-900'
                 }`}
                 placeholder="Add a progress update..."
                 rows="3"
               />
               <button
                 type="submit"
-                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                className={`mt-2 px-4 py-2 rounded-lg transition-colors ${
+                  isDarkMode
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-blue-500 hover:bg-blue-600 text-white'
+                }`}
               >
                 Add Log
               </button>
@@ -416,20 +471,26 @@ function ProjectModal({ project, onClose, isDarkMode }) {
 
             <div className="space-y-4">
               {logs.map((log) => (
-                <div
+                <motion.div
                   key={log.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
                   className={`p-4 rounded-lg ${
                     isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
                   }`}
                 >
                   <p className="mb-2">{log.text}</p>
-                  <time className="text-sm text-gray-500">{log.date}</time>
-                </div>
+                  <time className={`text-sm ${
+                    isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                  }`}>
+                    {log.date}
+                  </time>
+                </motion.div>
               ))}
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }
