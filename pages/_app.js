@@ -286,6 +286,22 @@ function ProjectModal({ project, onClose, isDarkMode }) {
   const [logs, setLogs] = useState([]);
   const [media, setMedia] = useState([]);
 
+  // ログとメディアをローカルストレージに保存
+  useEffect(() => {
+    const savedLogs = localStorage.getItem(`logs-${project.title}`);
+    const savedMedia = localStorage.getItem(`media-${project.title}`);
+    if (savedLogs) setLogs(JSON.parse(savedLogs));
+    if (savedMedia) setMedia(JSON.parse(savedMedia));
+  }, [project.title]);
+
+  useEffect(() => {
+    localStorage.setItem(`logs-${project.title}`, JSON.stringify(logs));
+  }, [logs, project.title]);
+
+  useEffect(() => {
+    localStorage.setItem(`media-${project.title}`, JSON.stringify(media));
+  }, [media, project.title]);
+
   const addLog = (e) => {
     e.preventDefault();
     if (!newLog.trim()) return;
@@ -429,9 +445,17 @@ function MyApp({ Component, pageProps }) {
   const [selectedProject, setSelectedProject] = useState(null);
   const [projectLogs, setProjectLogs] = useState({});
 
+  // ダークモードの状態をローカルストレージに保存
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+    setIsDarkMode(savedDarkMode);
+  }, []);
+
   // ダークモード切り替え
   const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    localStorage.setItem('darkMode', newDarkMode.toString());
   };
 
   useEffect(() => {
@@ -518,88 +542,73 @@ function MyApp({ Component, pageProps }) {
         />
       </Head>
 
-      <div className={`min-h-screen w-full ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
+      <div className={`min-h-screen w-full transition-colors duration-300 ${
+        isDarkMode 
+          ? 'bg-gray-900 text-gray-100' 
+          : 'bg-white text-gray-900'
+      }`}>
         {/* ダークモードトグル */}
         <button
           onClick={toggleDarkMode}
-          className="fixed top-4 left-4 z-20 p-2 rounded-lg bg-gray-200 dark:bg-gray-800"
+          className={`fixed top-4 left-4 z-20 p-3 rounded-lg transition-colors duration-300 ${
+            isDarkMode
+              ? 'bg-gray-800 text-gray-100 hover:bg-gray-700'
+              : 'bg-white text-gray-900 hover:bg-gray-100 shadow-md'
+          }`}
         >
           {isDarkMode ? '🌞' : '🌙'}
         </button>
 
-        {/* メインコンテナの背景色を明るく調整 */}
-        <div className="min-h-screen w-full bg-white" role="application">
-          {/* ナビゲーションの背景色を調整 */}
-          <nav className="fixed top-4 right-4 z-20">
-            <div className="flex gap-4">
-              <button 
-                onClick={() => setCurrentPage('projects')}
-                className="px-4 py-2 text-gray-700 hover:text-gray-900 bg-white shadow-sm hover:shadow-md rounded-lg transition-all duration-300"
+        {/* ナビゲーション */}
+        <nav className="fixed top-4 right-4 z-20">
+          <div className="flex gap-4">
+            {['projects', 'about', 'contact'].map((page) => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`px-4 py-2 rounded-lg transition-all duration-300 ${
+                  isDarkMode
+                    ? 'bg-gray-800 text-gray-100 hover:bg-gray-700'
+                    : 'bg-white text-gray-900 hover:bg-gray-100 shadow-md'
+                } ${currentPage === page && 'ring-2 ring-blue-500'}`}
               >
-                Projects
+                {page.charAt(0).toUpperCase() + page.slice(1)}
               </button>
-              <button 
-                onClick={() => setCurrentPage('about')}
-                className="px-4 py-2 text-gray-700 hover:text-gray-900 bg-white shadow-sm hover:shadow-md rounded-lg transition-all duration-300"
-              >
-                About
-              </button>
-              <button 
-                onClick={() => setCurrentPage('contact')}
-                className="px-4 py-2 text-gray-700 hover:text-gray-900 bg-white shadow-sm hover:shadow-md rounded-lg transition-all duration-300"
-              >
-                Contact
-              </button>
-            </div>
-          </nav>
-          {error && (
-            <div role="alert" className="fixed top-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-lg">
-              {error}
-            </div>
-          )}
-          {loading && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-10 backdrop-blur-sm"
-            >
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 border-t-2 border-blue-400 rounded-full animate-spin" />
-                <p className="mt-4 text-gray-800 font-space-grotesk">Loading...</p>
-              </div>
-            </motion.div>
-          )}
-
-          <AnimatePresence mode="wait">
-            <motion.main
-              key={currentPage}
-              initial="initial"
-              animate="enter"
-              exit="exit"
-              variants={pageVariants}
-              className="min-h-screen w-full relative z-10"
-            >
-              {renderContent()}
-            </motion.main>
-          </AnimatePresence>
-
-          {/* 背景のUXテキストを薄く調整 */}
-          <div 
-            className="fixed bottom-0 right-0 text-[20vw] font-bold text-gray-100 pointer-events-none select-none"
-            style={{ fontFamily: 'Space Grotesk' }}
-          >
-            UX
+            ))}
           </div>
+        </nav>
 
-          {/* プログレスバーの色を調整 */}
-          <motion.div
-            className="fixed top-0 left-0 right-0 h-1 bg-blue-500 origin-left z-50"
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ duration: 0.5 }}
-          />
+        {/* メインコンテンツ */}
+        <AnimatePresence mode="wait">
+          <motion.main
+            key={currentPage}
+            initial="initial"
+            animate="enter"
+            exit="exit"
+            variants={pageVariants}
+            className="min-h-screen w-full relative z-10"
+          >
+            {renderContent()}
+          </motion.main>
+        </AnimatePresence>
+
+        {/* UX背景テキスト */}
+        <div 
+          className={`fixed bottom-0 right-0 text-[20vw] font-bold pointer-events-none select-none transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-800' : 'text-gray-100'
+          }`}
+          style={{ fontFamily: 'Space Grotesk' }}
+        >
+          UX
         </div>
+
+        {/* プログレスバー */}
+        <motion.div
+          className="fixed top-0 left-0 right-0 h-1 bg-blue-500 origin-left z-50"
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ duration: 0.5 }}
+        />
       </div>
     </>
   );
