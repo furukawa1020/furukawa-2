@@ -192,7 +192,7 @@ function ContactContent() {
 }
 
 // Projectsページのコンテンツの改善
-function ProjectsContent() {
+function ProjectsContent({ isDarkMode }) {  // isDarkModeを受け取る
   const projects = [
     {
       title: "スタック雪だるまチャン",
@@ -218,6 +218,17 @@ function ProjectsContent() {
   ];
 
   const [selectedProject, setSelectedProject] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleProjectClick = (project) => {
+    setSelectedProject(project);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setTimeout(() => setSelectedProject(null), 300); // アニメーション後にnullに設定
+  };
 
   return (
     <div className="min-h-screen p-8 max-w-6xl mx-auto">
@@ -232,10 +243,12 @@ function ProjectsContent() {
           {projects.map((project, index) => (
             <motion.div
               key={index}
-              className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer"
+              className={`rounded-lg shadow-lg overflow-hidden cursor-pointer ${
+                isDarkMode ? 'bg-gray-800' : 'bg-white'
+              }`}
               whileHover={{ y: -5, scale: 1.02 }}
               transition={{ duration: 0.2 }}
-              onClick={() => setSelectedProject(project)}
+              onClick={() => handleProjectClick(project)}
             >
               <div className="relative h-48 bg-gray-200 overflow-hidden">
                 <motion.img
@@ -267,12 +280,24 @@ function ProjectsContent() {
         </div>
 
         <AnimatePresence>
-          {selectedProject && (
-            <ProjectModal
-              project={selectedProject}
-              onClose={() => setSelectedProject(null)}
-              isDarkMode={isDarkMode}
-            />
+          {isModalOpen && selectedProject && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+              className={`fixed inset-0 z-50 ${
+                isDarkMode ? 'bg-gray-900/95' : 'bg-white/95'
+              }`}
+            >
+              <div className="absolute inset-0 overflow-y-auto">
+                <ProjectModal
+                  project={selectedProject}
+                  onClose={handleModalClose}
+                  isDarkMode={isDarkMode}
+                />
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </motion.div>
@@ -334,21 +359,35 @@ function ProjectModal({ project, onClose, isDarkMode }) {
     setMedia([...newMedia, ...media]);
   };
 
+  // キーボードイベントの追加
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  // ダブルクリックで閉じる機能
+  const handleDoubleClick = (e) => {
+    if (e.detail === 2) { // ダブルクリック検出
+      onClose();
+    }
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm ${
-        isDarkMode ? 'bg-gray-900/90' : 'bg-gray-50/90'
-      }`}
+    <div 
+      className="min-h-screen p-4 md:p-8"
+      onClick={handleDoubleClick}
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className={`max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl ${
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 20, opacity: 0 }}
+        className={`max-w-4xl mx-auto rounded-xl shadow-2xl ${
           isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
         }`}
       >
@@ -490,8 +529,14 @@ function ProjectModal({ project, onClose, isDarkMode }) {
             </div>
           </div>
         </div>
+        {/* 閉じ方の説明を追加 */}
+        <div className={`text-center py-4 text-sm ${
+          isDarkMode ? 'text-gray-400' : 'text-gray-500'
+        }`}>
+          ダブルクリックまたはESCキーで戻る
+        </div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -574,13 +619,13 @@ function MyApp({ Component, pageProps }) {
   const renderContent = () => {
     switch (currentPage) {
       case 'projects':
-        return <ProjectsContent />;
+        return <ProjectsContent isDarkMode={isDarkMode} />;  // isDarkModeを渡す
       case 'about':
         return <AboutContent />;
       case 'contact':
         return <ContactContent />;
       default:
-        return <ProjectsContent />; // デフォルトをProjectsページに設定
+        return <ProjectsContent isDarkMode={isDarkMode} />;  // ここも同様
     }
   };
 
@@ -617,7 +662,7 @@ function MyApp({ Component, pageProps }) {
               : 'bg-white text-gray-900 hover:bg-gray-100 shadow-md'
           }`}
         >
-          {isDarkMode ? '🌞' : '🌙'}
+          {isDarkMode ? '🌙' : '🌞'}  {/* アイコンを入れ替え */}
         </button>
 
         {/* ナビゲーション */}
