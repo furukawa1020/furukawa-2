@@ -217,6 +217,8 @@ function ProjectsContent() {
     }
   ];
 
+  const [selectedProject, setSelectedProject] = useState(null);
+
   return (
     <div className="min-h-screen p-8 max-w-6xl mx-auto">
       <motion.div
@@ -230,9 +232,10 @@ function ProjectsContent() {
           {projects.map((project, index) => (
             <motion.div
               key={index}
-              className="bg-white rounded-lg shadow-lg overflow-hidden"
+              className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer"
               whileHover={{ y: -5, scale: 1.02 }}
               transition={{ duration: 0.2 }}
+              onClick={() => setSelectedProject(project)}
             >
               <div className="relative h-48 bg-gray-200 overflow-hidden">
                 <motion.img
@@ -262,8 +265,156 @@ function ProjectsContent() {
             </motion.div>
           ))}
         </div>
+
+        <AnimatePresence>
+          {selectedProject && (
+            <ProjectModal
+              project={selectedProject}
+              onClose={() => setSelectedProject(null)}
+              isDarkMode={isDarkMode}
+            />
+          )}
+        </AnimatePresence>
       </motion.div>
     </div>
+  );
+}
+
+// 同じファイル内に追加
+function ProjectModal({ project, onClose, isDarkMode }) {
+  const [newLog, setNewLog] = useState('');
+  const [logs, setLogs] = useState([]);
+  const [media, setMedia] = useState([]);
+
+  const addLog = (e) => {
+    e.preventDefault();
+    if (!newLog.trim()) return;
+    
+    const newLogEntry = {
+      id: Date.now(),
+      text: newLog,
+      date: new Date().toLocaleString()
+    };
+    
+    setLogs([newLogEntry, ...logs]);
+    setNewLog('');
+  };
+
+  const handleMediaUpload = (e) => {
+    const files = Array.from(e.target.files);
+    const newMedia = files.map(file => ({
+      id: Date.now(),
+      type: file.type.startsWith('image/') ? 'image' : 'video',
+      url: URL.createObjectURL(file),
+      name: file.name
+    }));
+    setMedia([...newMedia, ...media]);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${
+        isDarkMode ? 'bg-gray-900/95' : 'bg-gray-50/95'
+      }`}
+    >
+      <div className={`max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl ${
+        isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
+      }`}>
+        <div className="sticky top-0 z-10 p-4 border-b flex justify-between items-center">
+          <h2 className="text-2xl font-bold">{project.title}</h2>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="p-6 space-y-8">
+          {/* プロジェクト詳細 */}
+          <div>
+            <p className="text-lg mb-4">{project.description}</p>
+            <div className="flex flex-wrap gap-2">
+              {project.tags.map((tag, index) => (
+                <span key={index} className="px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* メディアアップロード */}
+          <div>
+            <h3 className="text-xl font-bold mb-4">Progress Media</h3>
+            <input
+              type="file"
+              accept="image/*,video/*"
+              multiple
+              onChange={handleMediaUpload}
+              className="hidden"
+              id="media-upload"
+            />
+            <label
+              htmlFor="media-upload"
+              className="inline-block px-4 py-2 rounded-lg bg-blue-500 text-white cursor-pointer hover:bg-blue-600"
+            >
+              Add Media
+            </label>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+              {media.map((item) => (
+                <div key={item.id} className="relative rounded-lg overflow-hidden">
+                  {item.type === 'image' ? (
+                    <img src={item.url} alt="" className="w-full h-48 object-cover" />
+                  ) : (
+                    <video src={item.url} className="w-full h-48 object-cover" controls />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ログ追加フォーム */}
+          <div>
+            <h3 className="text-xl font-bold mb-4">Progress Logs</h3>
+            <form onSubmit={addLog} className="mb-4">
+              <textarea
+                value={newLog}
+                onChange={(e) => setNewLog(e.target.value)}
+                className={`w-full p-3 rounded-lg border ${
+                  isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'
+                }`}
+                placeholder="Add a progress update..."
+                rows="3"
+              />
+              <button
+                type="submit"
+                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              >
+                Add Log
+              </button>
+            </form>
+
+            <div className="space-y-4">
+              {logs.map((log) => (
+                <div
+                  key={log.id}
+                  className={`p-4 rounded-lg ${
+                    isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
+                  }`}
+                >
+                  <p className="mb-2">{log.text}</p>
+                  <time className="text-sm text-gray-500">{log.date}</time>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -274,6 +425,14 @@ function MyApp({ Component, pageProps }) {
   const [loadingKey, setLoadingKey] = useState(0);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState('home');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [projectLogs, setProjectLogs] = useState({});
+
+  // ダークモード切り替え
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+  };
 
   useEffect(() => {
     const handleStart = () => {
@@ -359,78 +518,88 @@ function MyApp({ Component, pageProps }) {
         />
       </Head>
 
-      {/* メインコンテナの背景色を明るく調整 */}
-      <div className="min-h-screen w-full bg-white" role="application">
-        {/* ナビゲーションの背景色を調整 */}
-        <nav className="fixed top-4 right-4 z-20">
-          <div className="flex gap-4">
-            <button 
-              onClick={() => setCurrentPage('projects')}
-              className="px-4 py-2 text-gray-700 hover:text-gray-900 bg-white shadow-sm hover:shadow-md rounded-lg transition-all duration-300"
-            >
-              Projects
-            </button>
-            <button 
-              onClick={() => setCurrentPage('about')}
-              className="px-4 py-2 text-gray-700 hover:text-gray-900 bg-white shadow-sm hover:shadow-md rounded-lg transition-all duration-300"
-            >
-              About
-            </button>
-            <button 
-              onClick={() => setCurrentPage('contact')}
-              className="px-4 py-2 text-gray-700 hover:text-gray-900 bg-white shadow-sm hover:shadow-md rounded-lg transition-all duration-300"
-            >
-              Contact
-            </button>
-          </div>
-        </nav>
-        {error && (
-          <div role="alert" className="fixed top-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-lg">
-            {error}
-          </div>
-        )}
-        {loading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-10 backdrop-blur-sm"
-          >
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 border-t-2 border-blue-400 rounded-full animate-spin" />
-              <p className="mt-4 text-gray-800 font-space-grotesk">Loading...</p>
-            </div>
-          </motion.div>
-        )}
-
-        <AnimatePresence mode="wait">
-          <motion.main
-            key={currentPage}
-            initial="initial"
-            animate="enter"
-            exit="exit"
-            variants={pageVariants}
-            className="min-h-screen w-full relative z-10"
-          >
-            {renderContent()}
-          </motion.main>
-        </AnimatePresence>
-
-        {/* 背景のUXテキストを薄く調整 */}
-        <div 
-          className="fixed bottom-0 right-0 text-[20vw] font-bold text-gray-100 pointer-events-none select-none"
-          style={{ fontFamily: 'Space Grotesk' }}
+      <div className={`min-h-screen w-full ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
+        {/* ダークモードトグル */}
+        <button
+          onClick={toggleDarkMode}
+          className="fixed top-4 left-4 z-20 p-2 rounded-lg bg-gray-200 dark:bg-gray-800"
         >
-          UX
-        </div>
+          {isDarkMode ? '🌞' : '🌙'}
+        </button>
 
-        {/* プログレスバーの色を調整 */}
-        <motion.div
-          className="fixed top-0 left-0 right-0 h-1 bg-blue-500 origin-left z-50"
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ duration: 0.5 }}
-        />
+        {/* メインコンテナの背景色を明るく調整 */}
+        <div className="min-h-screen w-full bg-white" role="application">
+          {/* ナビゲーションの背景色を調整 */}
+          <nav className="fixed top-4 right-4 z-20">
+            <div className="flex gap-4">
+              <button 
+                onClick={() => setCurrentPage('projects')}
+                className="px-4 py-2 text-gray-700 hover:text-gray-900 bg-white shadow-sm hover:shadow-md rounded-lg transition-all duration-300"
+              >
+                Projects
+              </button>
+              <button 
+                onClick={() => setCurrentPage('about')}
+                className="px-4 py-2 text-gray-700 hover:text-gray-900 bg-white shadow-sm hover:shadow-md rounded-lg transition-all duration-300"
+              >
+                About
+              </button>
+              <button 
+                onClick={() => setCurrentPage('contact')}
+                className="px-4 py-2 text-gray-700 hover:text-gray-900 bg-white shadow-sm hover:shadow-md rounded-lg transition-all duration-300"
+              >
+                Contact
+              </button>
+            </div>
+          </nav>
+          {error && (
+            <div role="alert" className="fixed top-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-lg">
+              {error}
+            </div>
+          )}
+          {loading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-10 backdrop-blur-sm"
+            >
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 border-t-2 border-blue-400 rounded-full animate-spin" />
+                <p className="mt-4 text-gray-800 font-space-grotesk">Loading...</p>
+              </div>
+            </motion.div>
+          )}
+
+          <AnimatePresence mode="wait">
+            <motion.main
+              key={currentPage}
+              initial="initial"
+              animate="enter"
+              exit="exit"
+              variants={pageVariants}
+              className="min-h-screen w-full relative z-10"
+            >
+              {renderContent()}
+            </motion.main>
+          </AnimatePresence>
+
+          {/* 背景のUXテキストを薄く調整 */}
+          <div 
+            className="fixed bottom-0 right-0 text-[20vw] font-bold text-gray-100 pointer-events-none select-none"
+            style={{ fontFamily: 'Space Grotesk' }}
+          >
+            UX
+          </div>
+
+          {/* プログレスバーの色を調整 */}
+          <motion.div
+            className="fixed top-0 left-0 right-0 h-1 bg-blue-500 origin-left z-50"
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.5 }}
+          />
+        </div>
       </div>
     </>
   );
