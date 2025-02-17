@@ -9,8 +9,8 @@ const nextConfig = {
   experimental: {
     forceSwcTransforms: true,
   },
-  // Netlify用の設定を追加
-  target: 'serverless',
+  // targetプロパティを削除し、output設定を追加
+  output: 'standalone',
   webpack: (config) => {
     config.resolve.fallback = { fs: false, path: false };
     return config;
