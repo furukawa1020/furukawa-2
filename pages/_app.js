@@ -6,14 +6,30 @@ import '../styles/globals.css';
 import { openDB } from 'idb';
 import Image from 'next/image';
 
+// IndexedDB初期化の改善
 const initDB = async () => {
-  const db = await openDB('projects-db', 1, {
-    upgrade(db) {
-      db.createObjectStore('media');
-      db.createObjectStore('logs');
-    },
-  });
-  return db;
+  try {
+    const db = await openDB('projects-db', 1, {
+      upgrade(db) {
+        // メディアストア
+        if (!db.objectStoreNames.contains('media')) {
+          db.createObjectStore('media', { keyPath: 'id' });
+        }
+        // ログストア
+        if (!db.objectStoreNames.contains('logs')) {
+          db.createObjectStore('logs', { keyPath: 'id' });
+        }
+        // プロジェクトストア
+        if (!db.objectStoreNames.contains('projects')) {
+          db.createObjectStore('projects', { keyPath: 'title' });
+        }
+      },
+    });
+    return db;
+  } catch (error) {
+    console.error('Database initialization failed:', error);
+    return null;
+  }
 };
 
 // Aboutページのコンテンツ
@@ -337,11 +353,57 @@ function MediaSkeleton() {
 }
 
 // 同じファイル内に追加
+// ProjectModalコンポーネント内でIndexedDBを使用
 const ProjectModal = React.memo(({ project, onClose, isDarkMode }) => {
   const [newLog, setNewLog] = useState('');
   const [logs, setLogs] = useState([]);
   const [media, setMedia] = useState([]);
   const modalRef = useRef(null);
+
+  // IndexedDBからデータを読み込む
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const db = await initDB();
+        if (!db) return;
+
+        const mediaData = await db.get('media', project.title) || [];
+        const logsData = await db.get('logs', project.title) || [];
+        
+        setMedia(mediaData);
+        setLogs(logsData);
+      } catch (error) {
+        console.error('Failed to load data:', error);
+      }
+    };
+    loadData();
+  }, [project.title]);
+
+  // データの保存
+  const saveData = async (type, data) => {
+    try {
+      const db = await initDB();
+      if (!db) return;
+
+      await db.put(type, { id: project.title, data });
+    } catch (error) {
+      console.error('Failed to save data:', error);
+    }
+  };
+
+  // メディアの保存
+  useEffect(() => {
+    if (media.length > 0) {
+      saveData('media', media);
+    }
+  }, [media, project.title]);
+
+  // ログの保存
+  useEffect(() => {
+    if (logs.length > 0) {
+      saveData('logs', logs);
+    }
+  }, [logs, project.title]);
 
   // ローカルストレージからデータを読み込む
   useEffect(() => {
