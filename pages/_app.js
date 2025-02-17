@@ -759,29 +759,18 @@ const ProjectModal = React.memo(({ project, onClose }) => {
 
 function MyApp({ Component, pageProps }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [currentPage, setCurrentPage] = useState('home');
+  const router = useRouter();
 
   useEffect(() => {
-    // ダークモードの初期設定
     const savedDarkMode = localStorage.getItem('darkMode') === 'true';
     setIsDarkMode(savedDarkMode);
   }, []);
 
   return (
-    <AppContext.Provider value={{ 
-      isDarkMode, 
-      setIsDarkMode,
-      currentPage,
-      setCurrentPage 
-    }}>
+    <AppContext.Provider value={{ isDarkMode, setIsDarkMode }}>
       <div className={isDarkMode ? 'dark' : ''}>
-        <Head>
-          <title>Empathetic Warmth Project</title>
-          <meta name="description" content="効率の外にある価値を大切にするプロジェクト" />
-        </Head>
-
         <div className={`min-h-screen transition-colors duration-300 ${
-          isDarkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'
+          isDarkMode ? 'bg-gray-900 text-gray-100 [&_*]:text-gray-100' : 'bg-white text-gray-900'
         }`}>
           <Component {...pageProps} />
         </div>
