@@ -2,5 +2,12 @@
   command = "npm run build"
   publish = ".next"
 
+[build.environment]
+  NEXT_USE_NETLIFY_EDGE = "true"
+  NEXT_SHARP_PATH = "/tmp/node_modules/sharp"
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+[functions]
+  included_files = ["!node_modules/@next/swc-*/**/*"]

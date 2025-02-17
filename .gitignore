@@ -1,1 +1,8 @@
+.next
 node_modules
+.env
+.env.local
+out
+build
+dist
+.netlify

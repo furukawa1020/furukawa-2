@@ -1,9 +1,8 @@
 module.exports = {
-  reactStrictMode: true,
-  swcMinify: true,
+  output: 'standalone',
   images: {
-    domains: ['localhost'],
-    unoptimized: true
+    unoptimized: true,
+    domains: ['localhost']
   },
   webpack: (config) => {
     config.resolve.fallback = { fs: false, path: false };
