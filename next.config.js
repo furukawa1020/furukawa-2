@@ -9,11 +9,10 @@ const nextConfig = {
   experimental: {
     forceSwcTransforms: true,
   },
+  // Netlify用の設定を追加
+  target: 'serverless',
   webpack: (config) => {
     config.resolve.fallback = { fs: false, path: false };
-    config.externals = {
-      'tailwind-scrollbar': 'tailwind-scrollbar'
-    };
     return config;
   }
 };

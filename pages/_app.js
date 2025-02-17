@@ -1,10 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import '../styles/globals.css';
 import { openDB } from 'idb';
 import Image from 'next/image';
+あーはあーは
+// AppContextの作成
+export const AppContext = createContext({
+  isDarkMode: false,
+  setIsDarkMode: () => {},
+});
 
 // IndexedDB初期化の改善
 const initDB = async () => {
@@ -220,7 +226,8 @@ function ContactContent() {
 }
 
 // Projectsページのコンテンツの改善
-function ProjectsContent({ isDarkMode }) {  // isDarkModeを受け取る
+function ProjectsContent() {
+  const { isDarkMode } = useContext(AppContext);
   const projects = [
     {
       title: "スタック雪だるまチャン",
@@ -345,6 +352,7 @@ function ProjectsContent({ isDarkMode }) {  // isDarkModeを受け取る
 
 // メディアローディング時のスケルトンUI
 function MediaSkeleton() {
+  const { isDarkMode } = useContext(AppContext);
   return (
     <div className={`animate-pulse rounded-lg overflow-hidden aspect-video ${
       isDarkMode ? 'bg-gray-700' : 'bg-gray-200'
@@ -354,7 +362,8 @@ function MediaSkeleton() {
 
 // 同じファイル内に追加
 // ProjectModalコンポーネント内でIndexedDBを使用
-const ProjectModal = React.memo(({ project, onClose, isDarkMode }) => {
+const ProjectModal = React.memo(({ project, onClose }) => {
+  const { isDarkMode } = useContext(AppContext);
   const [newLog, setNewLog] = useState('');
   const [logs, setLogs] = useState([]);
   const [media, setMedia] = useState([]);
@@ -695,6 +704,12 @@ function MyApp({ Component, pageProps }) {
   const [selectedProject, setSelectedProject] = useState(null);
   const [projectLogs, setProjectLogs] = useState({});
 
+  // AppContextの値を明示的に定義
+  const contextValue = {
+    isDarkMode,
+    setIsDarkMode,
+  };
+
   // ダークモードの状態をローカルストレージに保存
   useEffect(() => {
     const savedDarkMode = localStorage.getItem('darkMode') === 'true';
@@ -763,18 +778,18 @@ function MyApp({ Component, pageProps }) {
   const renderContent = () => {
     switch (currentPage) {
       case 'projects':
-        return <ProjectsContent isDarkMode={isDarkMode} />;  // isDarkModeを渡す
+        return <ProjectsContent />;  // isDarkModeを渡す
       case 'about':
         return <AboutContent />;
       case 'contact':
         return <ContactContent />;
       default:
-        return <ProjectsContent isDarkMode={isDarkMode} />;  // ここも同様
+        return <ProjectsContent />;  // ここも同様
     }
   };
 
   return (
-    <>
+    <AppContext.Provider value={contextValue}>
       <Head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -861,7 +876,7 @@ function MyApp({ Component, pageProps }) {
           transition={{ duration: 0.5 }}
         />
       </div>
-    </>
+    </AppContext.Provider>
   );
 }
 
