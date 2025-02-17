@@ -1,11 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./src/**/*.{js,ts,jsx,tsx}",
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./styles/**/*.css",
-    "./app/**/*.{js,ts,jsx,tsx}"
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   darkMode: 'class',
   theme: {
@@ -55,7 +52,6 @@ module.exports = {
     },
   },
   plugins: [
-    // スクロールバーのカスタマイズプラグイン
     require('tailwind-scrollbar')({ nocompatible: true }),
   ],
   variants: {
