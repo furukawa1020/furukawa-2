@@ -451,23 +451,63 @@ const ProjectModal = React.memo(({ project, onClose }) => {
 
   // メディアのアップロード処理を改善
   const handleMediaUpload = async (e) => {
-    const files = Array.from(e.target.files);
-    const newMedia = await Promise.all(files.map(async file => {
-      // Blobを作成してURLを生成
-      const blob = new Blob([file], { type: file.type });
-      const url = URL.createObjectURL(blob);
-      
-      return {
-        id: Date.now() + Math.random(),
-        type: file.type.startsWith('image/') ? 'image' : 'video',
-        url: url,
-        name: file.name,
-        date: new Date().toLocaleString('ja-JP')
-      };
-    }));
+    try {
+      const files = Array.from(e.target.files);
+      const newMedia = await Promise.all(files.map(async file => {
+        // ファイルサイズのバリデーション
+        if (file.size > 5 * 1024 * 1024) {
+          throw new Error('File size should be less than 5MB');
+        }
 
-    setMedia(prevMedia => [...newMedia, ...prevMedia]);
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            resolve({
+              id: Date.now() + Math.random(),
+              type: file.type.startsWith('image/') ? 'image' : 'video',
+              url: reader.result,
+              name: file.name,
+              date: new Date().toLocaleString('ja-JP')
+            });
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }));
+
+      // IndexedDBに保存
+      const db = await initDB();
+      if (db) {
+        await db.put('media', {
+          id: project.id,
+          items: [...newMedia, ...media]
+        });
+      }
+
+      setMedia(prevMedia => [...newMedia, ...prevMedia]);
+    } catch (error) {
+      console.error('Media upload failed:', error);
+      alert('メディアのアップロードに失敗しました。');
+    }
   };
+
+  // メディアの読み込み
+  useEffect(() => {
+    const loadMedia = async () => {
+      try {
+        const db = await initDB();
+        if (db) {
+          const savedMedia = await db.get('media', project.id);
+          if (savedMedia) {
+            setMedia(savedMedia.items);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load media:', error);
+      }
+    };
+    loadMedia();
+  }, [project.id]);
 
   // コンポーネントのクリーンアップでBlobURLを解放
   useEffect(() => {

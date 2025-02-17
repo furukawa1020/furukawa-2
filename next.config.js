@@ -5,6 +5,12 @@ const nextConfig = {
   images: {
     unoptimized: true,
     domains: ['localhost'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
   },
   experimental: {
     forceSwcTransforms: true,
