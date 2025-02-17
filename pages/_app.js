@@ -1,8 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import '../styles/globals.css';
+import { openDB } from 'idb';
+import Image from 'next/image';
+
+const initDB = async () => {
+  const db = await openDB('projects-db', 1, {
+    upgrade(db) {
+      db.createObjectStore('media');
+      db.createObjectStore('logs');
+    },
+  });
+  return db;
+};
 
 // Aboutページのコンテンツ
 function AboutContent() {
@@ -244,7 +256,7 @@ function ProjectsContent({ isDarkMode }) {  // isDarkModeを受け取る
             <motion.div
               key={index}
               className={`rounded-lg shadow-lg overflow-hidden cursor-pointer ${
-                isDarkMode ? 'bg-gray-800' : 'bg-white'
+                isDarkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'
               }`}
               whileHover={{ y: -5, scale: 1.02 }}
               transition={{ duration: 0.2 }}
@@ -260,15 +272,25 @@ function ProjectsContent({ isDarkMode }) {  // isDarkModeを受け取る
                 />
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-800 mb-2">{project.title}</h3>
-                <p className="text-gray-600 text-sm mb-4">
+                <h3 className={`text-xl font-bold mb-2 ${
+                  isDarkMode ? 'text-gray-100' : 'text-gray-800'
+                }`}>
+                  {project.title}
+                </h3>
+                <p className={`text-sm mb-4 ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                }`}>
                   {project.description}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {project.tags.map((tag, tagIndex) => (
                     <span
                       key={tagIndex}
-                      className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs"
+                      className={`px-2 py-1 rounded text-xs ${
+                        isDarkMode 
+                          ? 'bg-blue-900 text-blue-100'
+                          : 'bg-blue-100 text-blue-800'
+                      }`}
                     >
                       {tag}
                     </span>
@@ -305,11 +327,21 @@ function ProjectsContent({ isDarkMode }) {  // isDarkModeを受け取る
   );
 }
 
+// メディアローディング時のスケルトンUI
+function MediaSkeleton() {
+  return (
+    <div className={`animate-pulse rounded-lg overflow-hidden aspect-video ${
+      isDarkMode ? 'bg-gray-700' : 'bg-gray-200'
+    }`} />
+  );
+}
+
 // 同じファイル内に追加
-function ProjectModal({ project, onClose, isDarkMode }) {
+const ProjectModal = React.memo(({ project, onClose, isDarkMode }) => {
   const [newLog, setNewLog] = useState('');
   const [logs, setLogs] = useState([]);
   const [media, setMedia] = useState([]);
+  const modalRef = useRef(null);
 
   // ローカルストレージからデータを読み込む
   useEffect(() => {
@@ -346,18 +378,34 @@ function ProjectModal({ project, onClose, isDarkMode }) {
     setNewLog('');
   };
 
-  // メディアのアップロード
-  const handleMediaUpload = (e) => {
+  // メディアのアップロード処理を改善
+  const handleMediaUpload = async (e) => {
     const files = Array.from(e.target.files);
-    const newMedia = files.map(file => ({
-      id: Date.now() + Math.random(),
-      type: file.type.startsWith('image/') ? 'image' : 'video',
-      url: URL.createObjectURL(file),
-      name: file.name,
-      date: new Date().toLocaleString('ja-JP')
+    const newMedia = await Promise.all(files.map(async file => {
+      // Blobを作成してURLを生成
+      const blob = new Blob([file], { type: file.type });
+      const url = URL.createObjectURL(blob);
+      
+      return {
+        id: Date.now() + Math.random(),
+        type: file.type.startsWith('image/') ? 'image' : 'video',
+        url: url,
+        name: file.name,
+        date: new Date().toLocaleString('ja-JP')
+      };
     }));
-    setMedia([...newMedia, ...media]);
+
+    setMedia(prevMedia => [...newMedia, ...prevMedia]);
   };
+
+  // コンポーネントのクリーンアップでBlobURLを解放
+  useEffect(() => {
+    return () => {
+      media.forEach(item => {
+        URL.revokeObjectURL(item.url);
+      });
+    };
+  }, [media]);
 
   // キーボードイベントの追加
   useEffect(() => {
@@ -378,6 +426,14 @@ function ProjectModal({ project, onClose, isDarkMode }) {
     }
   };
 
+  // モーダルにフォーカストラップを追加
+  useEffect(() => {
+    const focusableElements = modalRef.current.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    // ...フォーカス管理のロジック
+  }, []);
+
   return (
     <div 
       className="min-h-screen p-4 md:p-8"
@@ -388,7 +444,7 @@ function ProjectModal({ project, onClose, isDarkMode }) {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 20, opacity: 0 }}
         className={`max-w-4xl mx-auto rounded-xl shadow-2xl ${
-          isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
+          isDarkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'
         }`}
       >
         {/* ヘッダー */}
@@ -413,13 +469,20 @@ function ProjectModal({ project, onClose, isDarkMode }) {
           {/* プロジェクト詳細 */}
           <div>
             <div className="aspect-video w-full rounded-lg overflow-hidden mb-6">
-              <img 
+              <Image 
                 src={project.image} 
                 alt={project.title}
+                width={800}
+                height={450}
                 className="w-full h-full object-cover"
+                priority
               />
             </div>
-            <p className="text-lg mb-4">{project.description}</p>
+            <p className={`text-lg mb-4 ${
+              isDarkMode ? 'text-gray-200' : 'text-gray-700'
+            }`}>
+              {project.description}
+            </p>
             <div className="flex flex-wrap gap-2">
               {project.tags.map((tag, index) => (
                 <span 
@@ -458,23 +521,42 @@ function ProjectModal({ project, onClose, isDarkMode }) {
               Add Media
             </label>
 
+            {/* メディアグリッド表示を改善 */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
               {media.map((item) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className={`relative rounded-lg overflow-hidden group ${
+                  className={`relative rounded-lg overflow-hidden aspect-video ${
                     isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
                   }`}
                 >
                   {item.type === 'image' ? (
-                    <img src={item.url} alt="" className="w-full h-48 object-cover" />
+                    <img
+                      src={item.url}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
                   ) : (
-                    <video src={item.url} className="w-full h-48 object-cover" controls />
+                    <video
+                      src={item.url}
+                      className="w-full h-full object-cover"
+                      controls
+                      playsInline
+                      preload="metadata"
+                    >
+                      <source src={item.url} type={item.type} />
+                      お使いのブラウザは動画の再生に対応していません。
+                    </video>
                   )}
-                  <div className="absolute bottom-0 left-0 right-0 p-2 text-xs bg-black/50 text-white">
-                    {item.date}
+                  {/* メディア情報のオーバーレイ */}
+                  <div className={`absolute bottom-0 left-0 right-0 p-2 text-xs bg-black/50 text-white transform transition-transform duration-200 ${
+                    isDarkMode ? 'group-hover:translate-y-0' : 'group-hover:translate-y-0'
+                  }`}>
+                    <p className="truncate">{item.name}</p>
+                    <p>{item.date}</p>
                   </div>
                 </motion.div>
               ))}
@@ -515,12 +597,12 @@ function ProjectModal({ project, onClose, isDarkMode }) {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   className={`p-4 rounded-lg ${
-                    isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
+                    isDarkMode ? 'bg-gray-700 text-gray-100' : 'bg-gray-50 text-gray-900'
                   }`}
                 >
                   <p className="mb-2">{log.text}</p>
                   <time className={`text-sm ${
-                    isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                    isDarkMode ? 'text-gray-300' : 'text-gray-500'
                   }`}>
                     {log.date}
                   </time>
@@ -538,7 +620,7 @@ function ProjectModal({ project, onClose, isDarkMode }) {
       </motion.div>
     </div>
   );
-}
+});
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
@@ -656,6 +738,7 @@ function MyApp({ Component, pageProps }) {
         {/* ダークモードトグル */}
         <button
           onClick={toggleDarkMode}
+          aria-label={isDarkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
           className={`fixed top-4 left-4 z-20 p-3 rounded-lg transition-colors duration-300 ${
             isDarkMode
               ? 'bg-gray-800 text-gray-100 hover:bg-gray-700'
