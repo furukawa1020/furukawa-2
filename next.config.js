@@ -8,10 +8,13 @@ const nextConfig = {
   },
   experimental: {
     forceSwcTransforms: true,
-    optimizeCss: true,
   },
   webpack: (config) => {
     config.resolve.fallback = { fs: false, path: false };
+    config.externals = {
+      ...config.externals,
+      'tailwind-scrollbar': 'tailwind-scrollbar',
+    };
     return config;
   }
 };
