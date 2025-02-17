@@ -9,10 +9,19 @@ const nextConfig = {
   experimental: {
     forceSwcTransforms: true,
   },
-  // targetプロパティを削除し、output設定を追加
+  // 出力サイズを最適化
   output: 'standalone',
+  // 不要なファイルを除外
   webpack: (config) => {
     config.resolve.fallback = { fs: false, path: false };
+    // 大きなファイルを分割
+    config.optimization = {
+      ...config.optimization,
+      splitChunks: {
+        chunks: 'all',
+        maxSize: 200000
+      }
+    };
     return config;
   }
 };

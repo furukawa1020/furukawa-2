@@ -13,3 +13,7 @@
 [functions]
   included_files = ["!node_modules/@next/swc-*/**/*"]
   node_bundler = "esbuild"
+  external_node_modules = ["sharp"]
+
+[build.processing]
+  skip_processing = true
