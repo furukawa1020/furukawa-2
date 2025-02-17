@@ -17,10 +17,3 @@
   from = "/*"
   to = "/index.html"
   status = 200
-
-# 現在のNode.jsバージョンを確認
-node -v
-
-# Node.js v18をインストール（管理者権限のコマンドプロンプトで実行）
-nvm install 18.19.0
-nvm use 18.19.0
