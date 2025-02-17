@@ -5,7 +5,7 @@ import Head from 'next/head';
 import '../styles/globals.css';
 import { openDB } from 'idb';
 import Image from 'next/image';
-あーはあーは
+
 // AppContextの作成
 export const AppContext = createContext({
   isDarkMode: false,
