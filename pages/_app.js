@@ -230,6 +230,7 @@ function ProjectsContent() {
   const { isDarkMode } = useContext(AppContext);
   const projects = [
     {
+      id: '1', // IDを必ず追加
       title: "スタック雪だるまチャン",
       description: "効率の外にある価値としての「カワイイ」を追求した、温かみのあるインタラクティブな雪だるまキャラクター。触れることで変化し、ユーザーとの対話を楽しむ体験を提供します。",
       image: "/images/snowman.jpg", // 雪だるまの画像パスを追加
@@ -360,14 +361,37 @@ function MediaSkeleton() {
   );
 }
 
-// 同じファイル内に追加
-// ProjectModalコンポーネント内でIndexedDBを使用
+// ProjectModalコンポーネントの重複を解消
 const ProjectModal = React.memo(({ project, onClose }) => {
   const { isDarkMode } = useContext(AppContext);
   const [newLog, setNewLog] = useState('');
   const [logs, setLogs] = useState([]);
   const [media, setMedia] = useState([]);
   const modalRef = useRef(null);
+
+  // メディアの読み込み処理
+  useEffect(() => {
+    const loadMedia = async () => {
+      if (!project?.id) {
+        console.error('Project ID is undefined');
+        return;
+      }
+
+      try {
+        const db = await initDB();
+        if (db) {
+          const data = await db.get('media', project.id);
+          if (data?.items) {
+            setMedia(data.items);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load media:', error);
+      }
+    };
+
+    loadMedia();
+  }, [project?.id]);
 
   // IndexedDBからデータを読み込む
   useEffect(() => {
@@ -734,187 +758,33 @@ const ProjectModal = React.memo(({ project, onClose }) => {
 });
 
 function MyApp({ Component, pageProps }) {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [isRouteChanging, setIsRouteChanging] = useState(false);
-  const [loadingKey, setLoadingKey] = useState(0);
-  const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState('home');
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [selectedProject, setSelectedProject] = useState(null);
-  const [projectLogs, setProjectLogs] = useState({});
+  const [currentPage, setCurrentPage] = useState('home');
 
-  // AppContextの値を明示的に定義
-  const contextValue = {
-    isDarkMode,
-    setIsDarkMode,
-  };
-
-  // ダークモードの状態をローカルストレージに保存
   useEffect(() => {
+    // ダークモードの初期設定
     const savedDarkMode = localStorage.getItem('darkMode') === 'true';
     setIsDarkMode(savedDarkMode);
   }, []);
 
-  // ダークモード切り替え
-  const toggleDarkMode = () => {
-    const newDarkMode = !isDarkMode;
-    setIsDarkMode(newDarkMode);
-    localStorage.setItem('darkMode', newDarkMode.toString());
-  };
-
-  useEffect(() => {
-    const handleStart = () => {
-      setIsRouteChanging(true);
-      setLoading(true);
-      setLoadingKey(prev => prev + 1);
-    };
-
-    const handleComplete = () => {
-      setIsRouteChanging(false);
-      setLoading(false);
-    };
-
-    const handleError = (err) => {
-      setError(err.message);
-      setLoading(false);
-      setIsRouteChanging(false);
-    };
-
-    router.events.on('routeChangeStart', handleStart);
-    router.events.on('routeChangeComplete', handleComplete);
-    router.events.on('routeChangeError', handleError);
-
-    return () => {
-      router.events.off('routeChangeStart', handleStart);
-      router.events.off('routeChangeComplete', handleComplete);
-      router.events.off('routeChangeError', handleError);
-    };
-  }, [router]);
-
-  const pageVariants = {
-    initial: {
-      opacity: 0,
-      y: 20
-    },
-    enter: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: [0.61, 1, 0.88, 1]
-      }
-    },
-    exit: {
-      opacity: 0,
-      y: 20,
-      transition: {
-        duration: 0.4
-      }
-    }
-  };
-
-  // ページ遷移のロジックを修正
-  const renderContent = () => {
-    switch (currentPage) {
-      case 'projects':
-        return <ProjectsContent />;  // isDarkModeを渡す
-      case 'about':
-        return <AboutContent />;
-      case 'contact':
-        return <ContactContent />;
-      default:
-        return <ProjectsContent />;  // ここも同様
-    }
-  };
-
   return (
-    <AppContext.Provider value={contextValue}>
-      <Head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        <meta name="description" content="Empathetic Warmth Project - Creating Beyond Efficiency" />
-        <title>Empathetic Warmth Project</title>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet"
-          crossOrigin="anonymous"
-        />
-        <link 
-          href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" 
-          rel="stylesheet"
-          crossOrigin="anonymous"
-        />
-      </Head>
+    <AppContext.Provider value={{ 
+      isDarkMode, 
+      setIsDarkMode,
+      currentPage,
+      setCurrentPage 
+    }}>
+      <div className={isDarkMode ? 'dark' : ''}>
+        <Head>
+          <title>Empathetic Warmth Project</title>
+          <meta name="description" content="効率の外にある価値を大切にするプロジェクト" />
+        </Head>
 
-      <div className={`min-h-screen w-full transition-colors duration-300 ${
-        isDarkMode 
-          ? 'bg-gray-900 text-gray-100' 
-          : 'bg-white text-gray-900'
-      }`}>
-        {/* ダークモードトグル */}
-        <button
-          onClick={toggleDarkMode}
-          aria-label={isDarkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
-          className={`fixed top-4 left-4 z-20 p-3 rounded-lg transition-colors duration-300 ${
-            isDarkMode
-              ? 'bg-gray-800 text-gray-100 hover:bg-gray-700'
-              : 'bg-white text-gray-900 hover:bg-gray-100 shadow-md'
-          }`}
-        >
-          {isDarkMode ? '🌙' : '🌞'}  {/* アイコンを入れ替え */}
-        </button>
-
-        {/* ナビゲーション */}
-        <nav className="fixed top-4 right-4 z-20">
-          <div className="flex gap-4">
-            {['projects', 'about', 'contact'].map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`px-4 py-2 rounded-lg transition-all duration-300 ${
-                  isDarkMode
-                    ? 'bg-gray-800 text-gray-100 hover:bg-gray-700'
-                    : 'bg-white text-gray-900 hover:bg-gray-100 shadow-md'
-                } ${currentPage === page && 'ring-2 ring-blue-500'}`}
-              >
-                {page.charAt(0).toUpperCase() + page.slice(1)}
-              </button>
-            ))}
-          </div>
-        </nav>
-
-        {/* メインコンテンツ */}
-        <AnimatePresence mode="wait">
-          <motion.main
-            key={currentPage}
-            initial="initial"
-            animate="enter"
-            exit="exit"
-            variants={pageVariants}
-            className="min-h-screen w-full relative z-10"
-          >
-            {renderContent()}
-          </motion.main>
-        </AnimatePresence>
-
-        {/* UX背景テキスト */}
-        <div 
-          className={`fixed bottom-0 right-0 text-[20vw] font-bold pointer-events-none select-none transition-colors duration-300 ${
-            isDarkMode ? 'text-gray-800' : 'text-gray-100'
-          }`}
-          style={{ fontFamily: 'Space Grotesk' }}
-        >
-          UX
+        <div className={`min-h-screen transition-colors duration-300 ${
+          isDarkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'
+        }`}>
+          <Component {...pageProps} />
         </div>
-
-        {/* プログレスバー */}
-        <motion.div
-          className="fixed top-0 left-0 right-0 h-1 bg-blue-500 origin-left z-50"
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ duration: 0.5 }}
-        />
       </div>
     </AppContext.Provider>
   );
