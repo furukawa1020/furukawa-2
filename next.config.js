@@ -12,8 +12,7 @@ const nextConfig = {
   webpack: (config) => {
     config.resolve.fallback = { fs: false, path: false };
     config.externals = {
-      ...config.externals,
-      'tailwind-scrollbar': 'tailwind-scrollbar',
+      'tailwind-scrollbar': 'tailwind-scrollbar'
     };
     return config;
   }
